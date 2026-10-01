@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сүннөт тойго чакыруу</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Great+Vibes&family=Marcellus&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --milk-bg: #F8F5F0;
+            --milk-card: #FFFDF9;
+            --primary-red: #6B0F10;
+            --accent-gold: #D4AF37;
+            --dark-gold: #9E7D18;
+            --text-dark: #221515;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--milk-bg);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #fireworksCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Башкы экран */
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #FFFFFF 0%, #F5EFE6 70%, #EADFCF 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1.2s ease, visibility 1.2s;
+            text-align: center;
+            padding: 20px;
+            box-shadow: inset 0 0 100px rgba(212, 175, 55, 0.2);
+        }
+
+        .welcome-light-glow {
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            animation: pulseGlow 3s infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.85); opacity: 0.6; }
+            100% { transform: scale(1.35); opacity: 1; }
+        }
+
+        /* Учуп бараткан Бүркүт контейнери */
+        .eagle-container {
+            width: 130px;
+            height: 130px;
+            border: 2px solid var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 25px rgba(107, 15, 16, 0.15), inset 0 0 15px rgba(212, 175, 55, 0.2);
+            position: relative;
+            background: #FFFFFF;
+            z-index: 2;
+            animation: eagleFloat 3s ease-in-out infinite alternate;
+        }
+
+        .eagle-svg {
+            width: 75px;
+            height: 75px;
+            fill: var(--primary-red);
+            filter: drop-shadow(0px 3px 5px rgba(158, 125, 24, 0.4));
+        }
+
+        .wing-left {
+            transform-origin: 40px 35px;
+            animation: flapLeft 1.8s ease-in-out infinite alternate;
+        }
+
+        .wing-right {
+            transform-origin: 40px 35px;
+            animation: flapRight 1.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes flapLeft {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(12deg) translateY(-2px); }
+        }
+
+        @keyframes flapRight {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-12deg) translateY(-2px); }
+        }
+
+        @keyframes eagleFloat {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-8px); }
+        }
+
+        .btn-open {
+            background: linear-gradient(135deg, #6B0F10 0%, #8C191B 100%);
+            border: 2px solid var(--accent-gold);
+            color: #FFFFFF;
+            padding: 18px 45px;
+            font-size: 1.2rem;
+            font-family: 'Marcellus', serif;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            margin-top: 25px;
+            border-radius: 30px;
+            box-shadow: 0 8px 25px rgba(107, 15, 16, 0.3);
+            z-index: 2;
+        }
+
+        .btn-open:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(107, 15, 16, 0.4);
+        }
+
+        /* Негизги карточка */
+        .card-container {
+            max-width: 550px;
+            width: 92%;
+            margin: 30px auto;
+            background: var(--milk-card);
+            border: 3px solid var(--accent-gold);
+            padding: 45px 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.5s ease, transform 1.5s ease;
+            text-align: center;
+            border-radius: 12px;
+            z-index: 10;
+        }
+
+        .card-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ornament-corner {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border: 3px solid var(--primary-red);
+        }
+        .top-left { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+        .top-right { top: 12px; right: 12px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: 12px; left: 12px; border-right: none; border-top: none; }
+        .bottom-right { bottom: 12px; right: 12px; border-left: none; border-top: none; }
+
+        .bismillah {
+            font-family: 'Marcellus', serif;
+            color: var(--primary-red);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .greeting {
+            color: var(--dark-gold);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .guest-box {
+            background: rgba(107, 15, 16, 0.04);
+            border-left: 3px solid var(--primary-red);
+            border-right: 3px solid var(--primary-red);
+            padding: 12px 15px;
+            margin: 10px 0 25px 0;
+        }
+
+        .guest-title {
+            font-size: 0.85rem;
+            color: var(--dark-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .guest-name {
+            font-family: 'Marcellus', serif;
+            font-size: 2rem;
+            color: var(--primary-red);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        h1 {
+            color: var(--primary-red);
+            font-size: 2.4rem;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 2.2rem;
+            color: var(--dark-gold);
+            margin-bottom: 25px;
+        }
+
+        .invitation-text {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            margin: 25px 0;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .details-box {
+            background-color: rgba(212, 175, 55, 0.08);
+            border: 1px dashed var(--accent-gold);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .detail-item {
+            margin: 15px 0;
+        }
+
+        .detail-item h3 {
+            color: var(--primary-red);
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .detail-item p {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .address-sub {
+            font-size: 1rem !important;
+            font-weight: normal !important;
+            color: #555;
+            margin-top: 3px;
+        }
+
+        .hosts-section {
+            margin: 25px 0 10px 0;
+            padding-top: 15px;
+            border-top: 1px solid rgba(212, 175, 55, 0.4);
+        }
+
+        .hosts-title {
+            color: var(--dark-gold);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .hosts-names {
+            font-size: 1.9rem;
+            color: var(--primary-red);
+            font-weight: bold;
+        }
+
+        .timer-title {
+            color: var(--primary-red);
+            margin: 25px 0 12px 0;
+            font-size: 1.1rem;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .time-box {
+            background: var(--primary-red);
+            color: #FFFFFF;
+            padding: 10px 5px;
+            min-width: 65px;
+            border-radius: 6px;
+            border: 1px solid var(--accent-gold);
+        }
+
+        .time-box span {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+        }
+
+        .time-box label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-red);
+            border: 2px solid var(--accent-gold);
+            color: var(--accent-gold);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fireworksCanvas"></canvas>
+
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Жарык ачуу экраны -->
+    <div id="welcome-screen">
+        <div class="welcome-light-glow"></div>
+    
+
+        <h2 style="font-family: 'Great Vibes', cursive; color: var(--dark-gold); font-size: 2.2rem; margin-bottom: 0;">Чакыруу каты</h2>
+        <h1 style="color: var(--primary-red); margin-bottom: 10px; font-size: 2.2rem;">Сүннөт Той</h1>
+        <button class="btn-open" onclick="openInvitation()">Чакырууну ачуу</button>
+    </div>
+
+    <!-- Музыка топчусу -->
+    <div class="music-control" id="music-btn" onclick="toggleMusic()" style="display: none;">
+        🎵
+    </div>
+
+    <!-- Негизги чакыруу каты -->
+    <div class="card-container" id="main-content">
+        <div class="ornament-corner top-left"></div>
+        <div class="ornament-corner top-right"></div>
+        <div class="ornament-corner bottom-left"></div>
+        <div class="ornament-corner bottom-right"></div>
+
+        <div class="greeting">Ассалому алейкум!</div>
+
+        <div class="guest-box">
+            <div class="guest-title">Урматтуу коногубуз:</div>
+            <div class="guest-name" id="guest-name">Жетимиш куда жана Сайракан кудагый</div>
+        </div>
+        
+        <h1>Сүннөт Той</h1>
+
+        <p class="invitation-text">
+           Үйүбүздө өтүп жаткан кубанычтуу тоюбузга келип, ак батаңызды берип, кадырлуу коногубуз болуп кетиңиздер!
+        </p>
+
+        <div class="details-box">
+            <div class="detail-item">
+                <h3>УБАКТЫСЫ</h3>
+                <p>24-Октябрь, 2026-жыл</p>
+            </div>
+            <div class="detail-item">
+                <h3>ДАРЕГИ</h3>
+                <p class="address-sub">Жалал-Абад облусу, Сузак району, Мундуз айылы, Зулпукар Маматов №24</p>
+            </div>
+        </div>
+
+        <div class="hosts-section">
+            <div class="hosts-title">Той ээлери:</div>
+            <div class="hosts-names">
+                Ааламбек, Жумагул
+            </div>
+        </div>
+
+        <h3 class="timer-title">Тойго чейин калды:</h3>
+        <div class="countdown">
+            <div class="time-box"><span id="days">00</span><label>Күн</label></div>
+            <div class="time-box"><span id="hours">00</span><label>Саат</label></div>
+            <div class="time-box"><span id="minutes">00</span><label>Мүнөт</label></div>
+            <div class="time-box"><span id="seconds">00</span><label>Секунд</label></div>
+        </div>
+    </div>
+
+    <script>
+        // Шилтемедеги ысымды автоматтык түрдө кошуу (?name=Коноктун_Аты)
+        const urlParams = new URLSearchParams(window.location.search);
+        const guestNameParam = urlParams.get('name');
+        if (guestNameParam) {
+            document.getElementById('guest-name').innerText = decodeURIComponent(guestNameParam);
+        }
+
+        // Canvas Салют Эффекти
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.radius = Math.random() * 2.5 + 1;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * (Math.random() * 6 + 2),
+                    y: (Math.random() - 0.5) * (Math.random() * 6 + 2)
+                };
+                this.alpha = 1;
+                this.friction = 0.96;
+                this.gravity = 0.03;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.015;
+            }
+        }
+
+        function createBurst(x, y) {
+            const colors = ['#D4AF37', '#6B0F10', '#9E7D18', '#FFD700'];
+            for (let i = 0; i < 30; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        let fireworksInterval = null;
+        function startSmallFireworks() {
+            fireworksInterval = setInterval(() => {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * (canvas.height * 0.6);
+                createBurst(x, y);
+            }, 600);
+        }
+
+        startSmallFireworks();
+
+        function animateFireworks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                if (particle.alpha > 0) {
+                    particle.update();
+                    particle.draw();
+                } else {
+                    particles.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animateFireworks);
+        }
+        animateFireworks();
+
+        // Аудио башкаруу
+        const music = document.getElementById('bg-music');
+        let isPlaying = false;
+
+        function openInvitation() {
+            const welcomeScreen = document.getElementById('welcome-screen');
+            welcomeScreen.style.opacity = '0';
+            welcomeScreen.style.visibility = 'hidden';
+
+            const mainContent = document.getElementById('main-content');
+            mainContent.classList.add('visible');
+
+            document.getElementById('music-btn').style.display = 'flex';
+
+            playMusic();
+
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createBurst(Math.random() * canvas.width, Math.random() * (canvas.height * 0.5));
+                }, i * 250);
+            }
+        }
+
+        function playMusic() {
+            music.play().then(() => {
+                isPlaying = true;
+                document.getElementById('music-btn').innerText = '🎵';
+            }).catch(error => {
+                console.log("Аудиону ойнотууда ката болду:", error);
+            });
+        }
+
+        function toggleMusic() {
+            if (isPlaying) {
+                music.pause();
+                document.getElementById('music-btn').innerText = '🔇';
+                isPlaying = false;
+            } else {
+                music.play();
+                document.getElementById('music-btn').innerText = '🎵';
+                isPlaying = true;
+            }
+        }
+
+        // Таймер
+        const eventDate = new Date(2026, 9, 25, 18, 0, 0).getTime(); 
+
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = eventDate - now;
+
+            if (distance < 0) {
+                clearInterval(timer);
+                document.querySelector('.countdown').innerHTML = "<p style='color: var(--primary-red); font-weight: bold;'>Той башталды!</p>";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = days < 10 ? '0' + days : days;
+            document.getElementById("hours").innerText = hours < 10 ? '0' + hours : hours;
+            document.getElementById("minutes").innerText = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById("seconds").innerText = seconds < 10 ? '0' + seconds : seconds;
+        }, 1000);
+    </script>
+</body>
+</html>
